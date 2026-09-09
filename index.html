@@ -1,0 +1,449 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}</style></head><body>
+<title>저녁 메뉴 뽑기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --page-bg: #fbf1e4;
+    --page-text: #2a1b12;
+    --muted: #8a6f57;
+    --accent: #e64a2e;
+    --accent-2: #f2a93b;
+    --card-bg: #fffdf8;
+    --card-border: #e9d9c2;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --page-bg: #150f0c;
+      --page-text: #f3e6d8;
+      --muted: #b79c86;
+      --accent: #ff6a45;
+      --accent-2: #ffc65c;
+      --card-bg: #201712;
+      --card-border: #3a2b20;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --page-bg: #150f0c;
+    --page-text: #f3e6d8;
+    --muted: #b79c86;
+    --accent: #ff6a45;
+    --accent-2: #ffc65c;
+    --card-bg: #201712;
+    --card-border: #3a2b20;
+  }
+
+  /* the machine chassis is a fixed physical object — same materials in both themes */
+  :root {
+    --chassis: #2b1a12;
+    --chassis-dark: #170e09;
+    --window-bg: #120b08;
+    --bulb: #ffcf6e;
+    --bulb-dim: #7a5a2a;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background: var(--page-bg);
+    color: var(--page-text);
+    font-family: "Gowun Dodum", "Apple SD Gothic Neo", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .stage {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+  }
+
+  header {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .eyebrow {
+    margin: 0;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  h1 {
+    margin: 0;
+    font-family: "Jua", "Apple SD Gothic Neo", sans-serif;
+    font-size: 36px;
+    line-height: 1.3;
+    letter-spacing: 0.02em;
+    text-wrap: balance;
+    color: var(--page-text);
+  }
+
+  .sub {
+    margin: 0;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  /* ---- machine ---- */
+  .machine {
+    width: 100%;
+    background: var(--chassis);
+    border-radius: 22px;
+    padding: 14px;
+    box-shadow:
+      0 18px 40px -18px rgba(0, 0, 0, 0.55),
+      inset 0 0 0 2px var(--chassis-dark);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .bulbs {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 6px;
+  }
+
+  .bulbs span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--bulb);
+    box-shadow: 0 0 6px 2px rgba(255, 207, 110, 0.55);
+    animation: twinkle 1.8s ease-in-out infinite;
+  }
+
+  .bulbs span:nth-child(odd) { animation-delay: 0.4s; }
+  .bulbs span:nth-child(3n) { animation-delay: 0.9s; }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; background: var(--bulb-dim); box-shadow: none; }
+  }
+
+  .reel-frame {
+    position: relative;
+    background: var(--window-bg);
+    border-radius: 14px;
+    padding: 0 14px;
+    box-shadow: inset 0 3px 10px rgba(0,0,0,0.6), inset 0 -3px 10px rgba(0,0,0,0.6);
+  }
+
+  .reel-window {
+    position: relative;
+    height: 372px; /* 5 rows x 74px + line borders wiggle room, adjusted via JS constant */
+    overflow: hidden;
+  }
+
+  .reel-track {
+    will-change: transform;
+  }
+
+  .reel-row {
+    height: 74px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 18px;
+    color: #f3e6d8;
+    opacity: 0.45;
+  }
+
+  .reel-row .emoji { font-size: 26px; }
+
+  .center-line {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: 50%;
+    height: 74px;
+    transform: translateY(-50%);
+    border-top: 2px solid var(--accent-2);
+    border-bottom: 2px solid var(--accent-2);
+    border-radius: 8px;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(255,198,92,0.10), rgba(255,198,92,0.02));
+  }
+
+  .reel-window::before,
+  .reel-window::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 110px;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .reel-window::before {
+    top: 0;
+    background: linear-gradient(180deg, var(--window-bg), rgba(18,11,8,0));
+  }
+  .reel-window::after {
+    bottom: 0;
+    background: linear-gradient(0deg, var(--window-bg), rgba(18,11,8,0));
+  }
+
+  .pointer {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent-2);
+    font-size: 16px;
+    z-index: 3;
+  }
+  .pointer.left { left: -2px; }
+  .pointer.right { right: -2px; }
+
+  .spin-btn {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    width: 132px;
+    height: 132px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--accent-2), var(--accent) 70%);
+    color: #2a1206;
+    font-family: "Jua", "Apple SD Gothic Neo", sans-serif;
+    font-size: 23px;
+    letter-spacing: 0.04em;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.25);
+    box-shadow:
+      0 10px 0 0 #a3341c,
+      0 16px 24px -6px rgba(0,0,0,0.45);
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+
+  .spin-btn:active:not(:disabled) {
+    transform: translateY(6px);
+    box-shadow: 0 4px 0 0 #a3341c, 0 8px 14px -4px rgba(0,0,0,0.45);
+  }
+
+  .spin-btn:disabled {
+    cursor: default;
+    filter: grayscale(0.35) brightness(0.9);
+  }
+
+  .spin-btn:focus-visible {
+    outline: 3px solid var(--page-text);
+    outline-offset: 4px;
+  }
+
+  .result {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 54px;
+  }
+
+  .result-label {
+    margin: 0;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .result-name {
+    margin: 0;
+    font-family: "Jua", "Apple SD Gothic Neo", sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+    color: var(--accent);
+  }
+
+  .result[hidden] { visibility: hidden; }
+
+  details {
+    width: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 10px 14px;
+  }
+
+  summary {
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  .pool {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: 6px 10px;
+    font-size: 13px;
+  }
+
+  .pool span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bulbs span { animation: none; }
+    .reel-track { transition-duration: 0.4s !important; }
+  }
+</style>
+
+<div class="stage">
+  <header>
+    <p class="eyebrow">오늘 저녁 뭐 먹지?</p>
+    <h1>저녁 메뉴 뽑기</h1>
+    <p class="sub" id="subCount">배달앱 인기 메뉴 + 내 최애 메뉴</p>
+  </header>
+
+  <div class="machine">
+    <div class="bulbs" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="reel-frame">
+      <div class="reel-window" id="reelWindow">
+        <div class="reel-track" id="track"></div>
+        <div class="center-line"></div>
+      </div>
+      <span class="pointer left">▶</span>
+      <span class="pointer right">◀</span>
+    </div>
+
+    <div class="bulbs" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <button class="spin-btn" id="spinBtn">돌리기</button>
+
+  <div class="result" id="result" hidden>
+    <p class="result-label">오늘 저녁은</p>
+    <p class="result-name" id="resultName"></p>
+  </div>
+
+  <details>
+    <summary id="poolSummary">후보 메뉴 보기</summary>
+    <div class="pool" id="pool"></div>
+  </details>
+</div>
+
+<script>
+  const menuItems = [
+    ["김밥", "🍙"], ["참치김밥", "🍙"], ["비빔밥", "🥗"],
+    ["김치찌개", "🍲"], ["순두부찌개", "🍲"], ["떡볶이", "🍢"],
+    ["잡채밥", "🍜"], ["계란찜", "🍳"], ["콩나물국밥", "🍚"],
+    ["제육덮밥", "🍱"], ["불고기덮밥", "🍱"], ["솥밥", "🍚"],
+    ["잔치국수", "🍜"], ["갈비탕", "🍲"], ["삼계탕", "🍗"],
+    ["초밥", "🍣"], ["연어초밥", "🍣"], ["우동", "🍜"],
+    ["짬뽕(순한맛)", "🍜"], ["짜장면", "🍜"],
+    ["마라샹궈", "🍲"], ["딤섬", "🥟"], ["탕수육(소)", "🍖"], ["볶음밥", "🍚"],
+    ["베트남쌀국수", "🍜"], ["분짜", "🥗"], ["팟타이", "🍜"], ["반세오", "🥞"],
+    ["포케", "🥙"], ["아보카도샌드위치", "🥪"], ["파스타(로제)", "🍝"],
+    ["마라탕", "🍲"], ["KFC 트위스터세트", "🌯"], ["제육냉면세트", "🍜"],
+    ["현선이네 떡볶이", "🍢"], ["교촌치킨", "🍗"], ["노랑치킨", "🍗"],
+    ["감자탕", "🍲"], ["순대국", "🍚"], ["스쿨푸드", "🍢"], ["피자", "🍕"],
+    ["야채고기찜", "🥘"], ["편백찜", "🍲"],
+    ["파작 샌드위치", "🥪"], ["쪽갈비", "🍖"], ["삼겹살", "🥓"], ["소곱창", "🔥"],
+    ["돼지곱창", "🌶️"], ["누룽지백숙", "🍗"], ["전기구이누룽지통닭", "🍗"],
+    ["타코", "🌮"], ["우렁쌈밥", "🥬"], ["족발", "🐷"], ["60계 쯔란윙봉치킨", "🍗"]
+  ];
+
+  const ITEM_H = 74;
+  const ROWS = 5;
+  const CENTER_ROW = 2;
+  const REPEATS = 14;
+  const N = menuItems.length;
+
+  const track = document.getElementById("track");
+  const pool = document.getElementById("pool");
+  const spinBtn = document.getElementById("spinBtn");
+  const result = document.getElementById("result");
+  const resultName = document.getElementById("resultName");
+
+  function rowHTML([name, emoji]) {
+    return `<div class="reel-row"><span class="emoji">${emoji}</span><span>${name}</span></div>`;
+  }
+
+  let trackHTML = "";
+  for (let r = 0; r < REPEATS; r++) {
+    for (let i = 0; i < N; i++) trackHTML += rowHTML(menuItems[i]);
+  }
+  track.innerHTML = trackHTML;
+
+  pool.innerHTML = menuItems
+    .map(([name, emoji]) => `<span>${emoji} ${name}</span>`)
+    .join("");
+  document.getElementById("subCount").textContent = `배달앱 인기 메뉴 + 내 최애 메뉴, 총 ${N}가지`;
+  document.getElementById("poolSummary").textContent = `후보 메뉴 ${N}가지 보기`;
+
+  let currentIndex = CENTER_ROW;
+  setPosition(false);
+
+  function setPosition(animated) {
+    track.style.transition = animated
+      ? "transform 4.4s cubic-bezier(0.11, 0.7, 0.1, 1)"
+      : "none";
+    track.style.transform = `translateY(${-(currentIndex - CENTER_ROW) * ITEM_H}px)`;
+  }
+
+  function highlightCenter() {
+    document.querySelectorAll(".reel-row").forEach((el) => (el.style.opacity = "0.45"));
+    const centerEl = track.children[currentIndex];
+    if (centerEl) centerEl.style.opacity = "1";
+  }
+  highlightCenter();
+
+  spinBtn.addEventListener("click", () => {
+    if (spinBtn.disabled) return;
+    spinBtn.disabled = true;
+    spinBtn.textContent = "돌리는 중";
+    result.hidden = true;
+
+    const targetIndex = Math.floor(Math.random() * N);
+    const currentMod = currentIndex % N;
+    const delta = (targetIndex - currentMod + N) % N;
+    const extraLoops = 8 + Math.floor(Math.random() * 2);
+    const newIndex = currentIndex + extraLoops * N + delta;
+
+    currentIndex = newIndex;
+    setPosition(true);
+
+    track.addEventListener(
+      "transitionend",
+      () => {
+        highlightCenter();
+        resultName.textContent = `${menuItems[targetIndex][1]} ${menuItems[targetIndex][0]}`;
+        result.hidden = false;
+        spinBtn.disabled = false;
+        spinBtn.textContent = "한 번 더!";
+
+        const reduceBy = Math.floor((currentIndex - CENTER_ROW) / N) * N;
+        if (reduceBy > 0) {
+          currentIndex -= reduceBy;
+          requestAnimationFrame(() => setPosition(false));
+        }
+      },
+      { once: true }
+    );
+  });
+</script>
+
+</body></html>
