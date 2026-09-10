@@ -314,13 +314,107 @@
     .bulbs span { animation: none; }
     .reel-track { transition-duration: 0.4s !important; }
   }
+
+  .request-box {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .request-btn {
+    appearance: none;
+    width: 100%;
+    cursor: pointer;
+    background: var(--card-bg);
+    border: 1px dashed var(--card-border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font: inherit;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .request-btn:hover { color: var(--accent); border-color: var(--accent-2); }
+
+  .request-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 12px 14px;
+  }
+
+  .request-form input {
+    font: inherit;
+    font-size: 14px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    background: var(--page-bg);
+    color: var(--page-text);
+  }
+
+  .request-form input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .request-save-btn {
+    appearance: none;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font: inherit;
+    font-weight: 700;
+    font-size: 13px;
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .request-save-btn:disabled { opacity: 0.5; cursor: default; }
+
+  .request-msg {
+    margin: 0;
+    font-size: 12px;
+    color: var(--accent);
+  }
+
+  footer {
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding-top: 4px;
+  }
+
+  footer a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  footer a:hover { color: var(--accent); }
+
+  .footer-line {
+    margin: 0;
+    font-size: 12px;
+    color: var(--muted);
+  }
 </style>
 
 <div class="stage">
   <header>
     <p class="eyebrow">오늘 저녁 뭐 먹지?</p>
     <h1>저녁 메뉴 뽑기</h1>
-    <p class="sub" id="subCount">배달앱 인기 메뉴 + 내 최애 메뉴</p>
+    <p class="sub" id="subCount">배달앱 인기 메뉴 + 추천 메뉴</p>
   </header>
 
   <div class="machine">
@@ -355,6 +449,21 @@
     <summary id="poolSummary">후보 메뉴 보기</summary>
     <div class="pool" id="pool"></div>
   </details>
+
+  <div class="request-box">
+    <button class="request-btn" id="requestBtn" aria-expanded="false">+ 메뉴 추가 요청</button>
+    <div class="request-form" id="requestForm" hidden>
+      <input id="requestInput" type="text" maxlength="40" placeholder="추가하고 싶은 메뉴를 적어주세요">
+      <button class="request-save-btn" id="requestSave">저장</button>
+      <p class="request-msg" id="requestMsg" hidden>요청이 저장됐어요. 알려주셔서 감사해요!</p>
+    </div>
+  </div>
+
+  <footer>
+    <p class="footer-line">문의 : 림봉봉 · chowchow28@naver.com</p>
+    <p class="footer-line"><a href="https://www.instagram.com/rimpong" target="_blank" rel="noopener">@rimpong</a></p>
+    <p class="footer-line">© 2026 rimpong. All rights reserved.</p>
+  </footer>
 </div>
 
 <script>
@@ -403,7 +512,7 @@
   pool.innerHTML = menuItems
     .map(([name, emoji]) => `<span>${emoji} ${name}</span>`)
     .join("");
-  document.getElementById("subCount").textContent = `배달앱 인기 메뉴 + 내 최애 메뉴, 총 ${N}가지`;
+  document.getElementById("subCount").textContent = `배달앱 인기 메뉴 + 추천 메뉴, 총 ${N}가지`;
   document.getElementById("poolSummary").textContent = `후보 메뉴 ${N}가지 보기`;
 
   let currentIndex = CENTER_ROW;
@@ -455,6 +564,36 @@
       },
       { once: true }
     );
+  });
+
+  const requestBtn = document.getElementById("requestBtn");
+  const requestForm = document.getElementById("requestForm");
+  const requestInput = document.getElementById("requestInput");
+  const requestSave = document.getElementById("requestSave");
+  const requestMsg = document.getElementById("requestMsg");
+
+  requestBtn.addEventListener("click", () => {
+    const opening = requestForm.hidden;
+    requestForm.hidden = !opening;
+    requestBtn.setAttribute("aria-expanded", String(opening));
+    requestBtn.textContent = opening ? "− 메뉴 추가 요청" : "+ 메뉴 추가 요청";
+    if (opening) requestInput.focus();
+  });
+
+  requestSave.addEventListener("click", () => {
+    const value = requestInput.value.trim();
+    if (!value) {
+      requestInput.focus();
+      return;
+    }
+    // TODO: wire to shared storage + weekly email digest (pending backend decision)
+    requestInput.value = "";
+    requestMsg.hidden = false;
+    setTimeout(() => { requestMsg.hidden = true; }, 3000);
+  });
+
+  requestInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") requestSave.click();
   });
 </script>
 
