@@ -411,31 +411,38 @@
     color: var(--muted);
   }
 
-  .icon-row {
+  .contact-row {
     display: flex;
-    justify-content: center;
     align-items: center;
-    gap: 12px;
-    margin: 2px 0;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .icon-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
   }
 
   .icon-link {
-    width: 38px;
-    height: 38px;
-    border-radius: 11px;
+    width: 13px;
+    height: 13px;
+    border-radius: 4px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     color: #fff;
     font-weight: 800;
-    font-size: 16px;
+    font-size: 7px;
+    line-height: 1;
     font-family: Arial, "Apple SD Gothic Neo", sans-serif;
     text-decoration: none;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
     transition: transform 0.15s ease;
   }
 
-  .icon-link:hover { transform: translateY(-3px); }
+  .icon-link:hover { transform: translateY(-1px); }
 
   .icon-mail { background: var(--accent); }
   .icon-instagram { background: linear-gradient(135deg, #f58529, #dd2a7b 55%, #8134af); }
@@ -494,18 +501,20 @@
   </div>
 
   <footer>
-    <p class="footer-line">* 문의 : 림봉봉</p>
-    <div class="icon-row">
-      <a class="icon-link icon-mail" href="mailto:chowchow28@naver.com" aria-label="이메일" title="이메일 chowchow28@naver.com">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
-      </a>
-      <a class="icon-link icon-instagram" href="https://www.instagram.com/rimpong" target="_blank" rel="noopener" aria-label="인스타그램" title="인스타그램 @rimpong">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1.1" fill="#fff" stroke="none"/></svg>
-      </a>
-      <a class="icon-link icon-youtube" href="https://www.youtube.com/@RIMPONG" target="_blank" rel="noopener" aria-label="유튜브" title="유튜브 @RIMPONG">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff"><path d="M9 7v10l8-5-8-5z"/></svg>
-      </a>
-      <a class="icon-link icon-blog" href="https://blog.naver.com/lets_go_rimpong" target="_blank" rel="noopener" aria-label="블로그" title="네이버 블로그 lets_go_rimpong">N</a>
+    <div class="footer-line contact-row">
+      <span>* 문의 : 림봉봉</span>
+      <span class="icon-row">
+        <a class="icon-link icon-mail" href="mailto:chowchow28@naver.com" aria-label="이메일" title="이메일 chowchow28@naver.com">
+          <svg viewBox="0 0 24 24" width="7" height="7" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+        </a>
+        <a class="icon-link icon-instagram" href="https://www.instagram.com/rimpong" target="_blank" rel="noopener" aria-label="인스타그램" title="인스타그램 @rimpong">
+          <svg viewBox="0 0 24 24" width="7" height="7" fill="none" stroke="#fff" stroke-width="2.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1.1" fill="#fff" stroke="none"/></svg>
+        </a>
+        <a class="icon-link icon-youtube" href="https://www.youtube.com/@RIMPONG" target="_blank" rel="noopener" aria-label="유튜브" title="유튜브 @RIMPONG">
+          <svg viewBox="0 0 24 24" width="7" height="7" fill="#fff"><path d="M9 7v10l8-5-8-5z"/></svg>
+        </a>
+        <a class="icon-link icon-blog" href="https://blog.naver.com/lets_go_rimpong" target="_blank" rel="noopener" aria-label="블로그" title="네이버 블로그 lets_go_rimpong">N</a>
+      </span>
     </div>
     <p class="footer-line">© 2026 rimpong. All rights reserved.</p>
   </footer>
