@@ -580,13 +580,24 @@
     if (opening) requestInput.focus();
   });
 
+  const REQUEST_FORM_ID = "1FAIpQLSdJpBepUyIkwjwotHnrx2vZ4Xja5V1VIpnT_-xr9ZmiI4k6HQ";
+  const REQUEST_ENTRY_ID = "entry.1135578025";
+
   requestSave.addEventListener("click", () => {
     const value = requestInput.value.trim();
     if (!value) {
       requestInput.focus();
       return;
     }
-    // TODO: wire to shared storage + weekly email digest (pending backend decision)
+
+    const body = new FormData();
+    body.append(REQUEST_ENTRY_ID, value);
+    fetch(`https://docs.google.com/forms/d/e/${REQUEST_FORM_ID}/formResponse`, {
+      method: "POST",
+      mode: "no-cors",
+      body,
+    }).catch(() => {});
+
     requestInput.value = "";
     requestMsg.hidden = false;
     setTimeout(() => { requestMsg.hidden = true; }, 3000);
