@@ -456,6 +456,7 @@
     <button class="request-btn" id="requestBtn" aria-expanded="false">+ 메뉴 추가 요청</button>
     <div class="request-form" id="requestForm" hidden>
       <input id="requestInput" type="text" maxlength="40" placeholder="추가하고 싶은 메뉴를 적어주세요">
+      <input id="requestNameInput" type="text" maxlength="20" placeholder="요청자 성함(선택)">
       <button class="request-save-btn" id="requestSave">저장</button>
       <p class="request-msg" id="requestMsg" hidden>요청이 저장됐어요. 알려주셔서 감사해요!</p>
     </div>
@@ -571,6 +572,7 @@
   const requestBtn = document.getElementById("requestBtn");
   const requestForm = document.getElementById("requestForm");
   const requestInput = document.getElementById("requestInput");
+  const requestNameInput = document.getElementById("requestNameInput");
   const requestSave = document.getElementById("requestSave");
   const requestMsg = document.getElementById("requestMsg");
 
@@ -584,9 +586,11 @@
 
   const REQUEST_FORM_ID = "1FAIpQLSdJpBepUyIkwjwotHnrx2vZ4Xja5V1VIpnT_-xr9ZmiI4k6HQ";
   const REQUEST_ENTRY_ID = "entry.473674839";
+  const REQUEST_NAME_ENTRY_ID = null; // TODO: 설문에 "요청자 성함" 질문 추가 후 entry ID로 교체
 
   requestSave.addEventListener("click", () => {
     const value = requestInput.value.trim();
+    const name = requestNameInput.value.trim();
     if (!value) {
       requestInput.focus();
       return;
@@ -594,6 +598,7 @@
 
     const body = new FormData();
     body.append(REQUEST_ENTRY_ID, value);
+    if (REQUEST_NAME_ENTRY_ID && name) body.append(REQUEST_NAME_ENTRY_ID, name);
     fetch(`https://docs.google.com/forms/d/e/${REQUEST_FORM_ID}/formResponse`, {
       method: "POST",
       mode: "no-cors",
@@ -601,12 +606,15 @@
     }).catch(() => {});
 
     requestInput.value = "";
+    requestNameInput.value = "";
     requestMsg.hidden = false;
     setTimeout(() => { requestMsg.hidden = true; }, 3000);
   });
 
-  requestInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") requestSave.click();
+  [requestInput, requestNameInput].forEach((el) => {
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") requestSave.click();
+    });
   });
 </script>
 
