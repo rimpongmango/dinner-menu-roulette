@@ -294,6 +294,67 @@
 
   .result[hidden] { visibility: hidden; }
 
+  /* ---- result card ---- */
+  .card-wrap {
+    width: 100%;
+    max-width: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .menu-card {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: block;
+    border-radius: 20px;
+    box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.4);
+  }
+
+  .card-actions {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+  }
+
+  .card-btn {
+    flex: 1;
+    appearance: none;
+    cursor: pointer;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    color: var(--page-text);
+    font-family: "Gowun Dodum", "Apple SD Gothic Neo", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 11px 10px;
+    border-radius: 12px;
+    transition: transform 0.08s ease, background 0.15s ease;
+  }
+
+  .card-btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff9f0;
+  }
+
+  .card-btn:active { transform: translateY(2px); }
+
+  .card-btn:disabled {
+    opacity: 0.55;
+    cursor: default;
+    transform: none;
+  }
+
+  .card-hint {
+    margin: 0;
+    min-height: 16px;
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+  }
+
   details {
     width: 100%;
     background: var(--card-bg);
@@ -495,6 +556,15 @@
     <p class="result-name" id="resultName"></p>
   </div>
 
+  <div class="card-wrap" id="cardWrap" hidden>
+    <canvas class="menu-card" id="cardCanvas" width="800" height="800"></canvas>
+    <div class="card-actions">
+      <button class="card-btn" id="saveBtn">이미지 저장</button>
+      <button class="card-btn primary" id="shareBtn">공유하기</button>
+    </div>
+    <p class="card-hint" id="cardHint"></p>
+  </div>
+
   <details>
     <summary id="poolSummary">후보 메뉴 보기</summary>
     <div class="pool" id="pool"></div>
@@ -562,6 +632,11 @@
   const spinBtn = document.getElementById("spinBtn");
   const result = document.getElementById("result");
   const resultName = document.getElementById("resultName");
+  const cardWrap = document.getElementById("cardWrap");
+  const cardCanvas = document.getElementById("cardCanvas");
+  const saveBtn = document.getElementById("saveBtn");
+  const shareBtn = document.getElementById("shareBtn");
+  const cardHint = document.getElementById("cardHint");
 
   function rowHTML([name, emoji]) {
     return `<div class="reel-row"><span class="emoji">${emoji}</span><span>${name}</span></div>`;
@@ -596,11 +671,165 @@
   }
   highlightCenter();
 
+  // ---- result card (square, saveable / shareable) ----
+  let currentName = "";
+  let currentEmoji = "";
+
+  function roundRectPath(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    if (ctx.roundRect) {
+      ctx.roundRect(x, y, w, h, r);
+      return;
+    }
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function fitFontSize(ctx, text, maxWidth, family, weight, startSize, minSize) {
+    let size = startSize;
+    while (size > minSize) {
+      ctx.font = `${weight} ${size}px "${family}", "Apple SD Gothic Neo", sans-serif`;
+      if (ctx.measureText(text).width <= maxWidth) break;
+      size -= 4;
+    }
+    return size;
+  }
+
+  async function ensureFontsReady() {
+    try {
+      await Promise.all([
+        document.fonts.load('700 64px "Jua"'),
+        document.fonts.load('700 26px "Gowun Dodum"'),
+        document.fonts.load('400 24px "Gowun Dodum"'),
+      ]);
+      await document.fonts.ready;
+    } catch (e) {
+      /* fonts best-effort; canvas falls back to system fonts */
+    }
+  }
+
+  async function drawCard(name, emoji) {
+    await ensureFontsReady();
+    const size = 800;
+    const ctx = cardCanvas.getContext("2d");
+    ctx.clearRect(0, 0, size, size);
+
+    roundRectPath(ctx, 0, 0, size, size, 40);
+    ctx.save();
+    ctx.clip();
+
+    const bg = ctx.createLinearGradient(0, 0, size, size);
+    bg.addColorStop(0, "#fdf3e6");
+    bg.addColorStop(1, "#f6dfb9");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, size, size);
+
+    const glow = ctx.createRadialGradient(size / 2, size * 0.42, 40, size / 2, size * 0.42, 320);
+    glow.addColorStop(0, "rgba(255, 198, 92, 0.35)");
+    glow.addColorStop(1, "rgba(255, 198, 92, 0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, size, size);
+
+    ctx.strokeStyle = "#e64a2e";
+    ctx.lineWidth = 10;
+    roundRectPath(ctx, 24, 24, size - 48, size - 48, 32);
+    ctx.stroke();
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "alphabetic";
+
+    ctx.fillStyle = "#e64a2e";
+    ctx.font = '700 28px "Gowun Dodum", "Apple SD Gothic Neo", sans-serif';
+    ctx.fillText("오늘 저녁은", size / 2, 150);
+
+    ctx.font = "220px sans-serif";
+    ctx.fillText(emoji, size / 2, 430);
+
+    const nameSize = fitFontSize(ctx, name, size - 160, "Jua", 700, 68, 32);
+    ctx.fillStyle = "#2a1b12";
+    ctx.font = `700 ${nameSize}px "Jua", "Apple SD Gothic Neo", sans-serif`;
+    ctx.fillText(name, size / 2, 540);
+
+    const dateStr = new Date().toLocaleDateString("ko-KR", {
+      month: "long",
+      day: "numeric",
+      weekday: "long",
+    });
+    ctx.fillStyle = "#8a6f57";
+    ctx.font = '400 24px "Gowun Dodum", "Apple SD Gothic Neo", sans-serif';
+    ctx.fillText(dateStr, size / 2, size - 92);
+
+    ctx.fillStyle = "#c9a97c";
+    ctx.font = '400 18px "Gowun Dodum", "Apple SD Gothic Neo", sans-serif';
+    ctx.fillText("저녁 메뉴 뽑기", size / 2, size - 52);
+
+    ctx.restore();
+  }
+
+  function canvasToBlob(canvas) {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("toBlob failed"))), "image/png");
+    });
+  }
+
+  saveBtn.addEventListener("click", async () => {
+    cardHint.textContent = "";
+    saveBtn.disabled = true;
+    try {
+      const blob = await canvasToBlob(cardCanvas);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `저녁메뉴_${currentName}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      cardHint.textContent = "저장했어요!";
+    } catch (err) {
+      cardHint.textContent = "저장에 실패했어요. 이미지를 길게 눌러 저장해보세요.";
+    } finally {
+      saveBtn.disabled = false;
+    }
+  });
+
+  shareBtn.addEventListener("click", async () => {
+    cardHint.textContent = "";
+    shareBtn.disabled = true;
+    try {
+      const blob = await canvasToBlob(cardCanvas);
+      const file = new File([blob], `저녁메뉴_${currentName}.png`, { type: "image/png" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "오늘 저녁 메뉴",
+          text: `오늘 저녁은 ${currentEmoji} ${currentName}!`,
+        });
+      } else {
+        throw new Error("share-unsupported");
+      }
+    } catch (err) {
+      if (err && err.name === "AbortError") {
+        // user cancelled the share sheet — no message needed
+      } else {
+        cardHint.textContent = "이 환경에서는 바로 공유가 어려워요. '이미지 저장' 후 카톡·문자에서 사진으로 보내주세요.";
+      }
+    } finally {
+      shareBtn.disabled = false;
+    }
+  });
+
   spinBtn.addEventListener("click", () => {
     if (spinBtn.disabled) return;
     spinBtn.disabled = true;
     spinBtn.textContent = "돌리는 중";
     result.hidden = true;
+    cardWrap.hidden = true;
+    cardHint.textContent = "";
 
     const targetIndex = Math.floor(Math.random() * N);
     const currentMod = currentIndex % N;
@@ -615,10 +844,16 @@
       "transitionend",
       () => {
         highlightCenter();
-        resultName.textContent = `${menuItems[targetIndex][1]} ${menuItems[targetIndex][0]}`;
+        currentName = menuItems[targetIndex][0];
+        currentEmoji = menuItems[targetIndex][1];
+        resultName.textContent = `${currentEmoji} ${currentName}`;
         result.hidden = false;
         spinBtn.disabled = false;
         spinBtn.textContent = "한 번 더!";
+
+        drawCard(currentName, currentEmoji).then(() => {
+          cardWrap.hidden = false;
+        });
 
         const reduceBy = Math.floor((currentIndex - CENTER_ROW) / N) * N;
         if (reduceBy > 0) {
